@@ -1,0 +1,15 @@
+version: '3'
+services:
+  php:
+    build: .
+    volumes:
+     - ./workspace:/opt/app
+  nginx:
+    image: "nginx"
+    volumes:
+     - ./workspace:/opt/app
+     - ./nginx-site.conf:/etc/nginx/conf.d/000_site.conf
+    ports:
+     - "8080:80"
+  redis:
+    image: "redis:4"

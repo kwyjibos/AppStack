@@ -1,0 +1,7 @@
+version: '3'
+services:
+  php:
+    environment:
+      DEBUG: 'true'
+  mongodb:
+    image: "mongo:3.4"
