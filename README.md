@@ -3,13 +3,13 @@
 
 This repo runs a stack of docker containers using docker-compose with mongodb, nginx, redis and php with phalcon.
 
-###Requirements:###
+### Requirements: ###
 Either one of the following setups;
 
  - Vagrant and VirtualBox
  - Clean install of Ubuntu 16.04
 
-### Guide to usage###
+### Guide to usage ###
  Clone the repo to your local machine.
  
  **Vagrant**
@@ -28,7 +28,7 @@ If you already have docker installed, then install the docker compose script usi
 You can now start the stack with **docker-compose up** , other commands docs are [here](https://docs.docker.com/compose/gettingstarted/)
 
  
-###Terraform Deploy###
+### Terraform Deploy ###
  The config provided deploys an auto-scaling group, fronted by an elastic loadbalancer and accompanying security groups.
 
 By default it launches into the default vpc for your environment, this is not reccomended for production and it would be expected to have a full vpc setup with private subnets and external services.
@@ -47,7 +47,7 @@ Apply the changes;
 
 The output of **terraform show**, should now show your environment including the external dns name of your new load balancer.
  
-### Notes###
+### Notes ###
 
 This is a very simplified stack missing a code deployment pipeline, a systemd service, clustered redis, enviroment variables, terraform state storage and SSL setup.
 
