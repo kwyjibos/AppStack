@@ -16,11 +16,21 @@ data "aws_ami" "ubuntu" {
   owners = ["099720109477"] # Canonical
 }
 
-data "aws_availability_zones" "available" {}
-
 resource "aws_security_group" "AppStackSG" {
   description = "Allow to Appstack"
   name        = "AppStackSG"
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+ ingress {
+    from_port = 8080
+    to_port   = 8080
+    protocol  = "tcp"
+    security_groups = ["${aws_security_group.AppStackLB.id}"]
+  }
   lifecycle {
     create_before_destroy = true
   }
@@ -29,6 +39,18 @@ resource "aws_security_group" "AppStackSG" {
 resource "aws_security_group" "AppStackLB" {
   description = "LB SG for AppStack"
   name        = "AppStackLB"
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+ ingress {
+    from_port = 80
+    to_port   = 80
+    protocol  = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
 }
 
 resource "aws_elb" "AppStack-elb" {
@@ -38,18 +60,17 @@ resource "aws_elb" "AppStack-elb" {
   security_groups = ["${aws_security_group.AppStackLB.id}"]
   listener {
     instance_port     = 8080
-    instance_protocol = "tcp"
+    instance_protocol = "http"
     lb_port           = 80
-    lb_protocol       = "tcp"
+    lb_protocol       = "http"
   }
   health_check {
     healthy_threshold   = 5
     unhealthy_threshold = 5
     timeout             = 5
-    target              = "HTTP:8080/"
+    target              = "HTTP:8080/index.php"
     interval            = 30
   }
-#  cross_zone_load_balancing   = true
   idle_timeout                = 300
   connection_draining         = true
   connection_draining_timeout = 300
@@ -73,7 +94,6 @@ resource "aws_autoscaling_group" "AppStack" {
   min_size             = "2"
   max_size             = "4"
   availability_zones   = "${var.availability_zones}"
-#  vpc_zone_identifier  = ["${var.vpc_subnet}"]
   load_balancers       = ["${aws_elb.AppStack-elb.id}"]
   launch_configuration = "${aws_launch_configuration.AppStack.name}"
 
@@ -83,5 +103,5 @@ resource "aws_autoscaling_group" "AppStack" {
 }
 
 data "template_file" "user_data" {
-  template = "bootstrap-prod.sh"
+  template = "${file("bootstrap-prod.sh")}"
 }
